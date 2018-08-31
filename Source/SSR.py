@@ -1,19 +1,19 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 import httplib
 import json
 import urllib
 
 class Client:
- 
+
   httpClient = None
   SERVER='/servers'
   STATUS='/status'
   TOGGLE='/toggle'
   MODE='/mode'
-  MODES=['auto','global','manual','bypasschina']
-  
+  MODES=['auto','global','manual']
+
   def __init__(self):
     self.httpClient = httplib.HTTPConnection('localhost', 9528, timeout=30)
 
@@ -101,40 +101,49 @@ class Client:
   def getList(self):
     list = self._getServers()
     enable = self._getStatus()
-    enableStr = 'True' if enable else 'False'
+    enableStr = 'Enable' if enable else 'Disable'
     enableOptStr = 'Disable' if enable else 'Enable'
     mode = self._getMode()
     items = []
     if list and mode:
-      enableItem = {
-        'title':'Enable: ' + enableStr,
-        'subtitle': 'Select to '+ enableOptStr,
-        'arg': 'enable:'+enableOptStr,
-        'icon': {'path': 'icon.png'}
-      }
-      if not enable:
-        enableItem['icon']['path'] = 'iconb.png'
-      items.append(enableItem)
-
-      for m in self.MODES:
-        modeItem = {
-          'title': 'Mode: '+m.title(),
-          'arg': 'mode:'+m,
-          'icon': {'path': 'iconb.png'}
+      def setToggler():
+        enableItem = {
+          'title':'Toggle',
+          'subtitle': 'Current: '+ enableStr,
+          'arg': 'enable:'+enableOptStr,
+          'icon': {'path': 'icon.png'}
         }
-        if m == mode:
-          modeItem['icon']['path'] = 'icon.png'
-          modeItem['subtitle'] = 'Current Mode'
-        else:
-          modeItem['subtitle'] = 'Switch to ' + m
-        items.append(modeItem)
+        if not enable:
+          enableItem['icon']['path'] = 'iconb.png'
+        items.append(enableItem)
 
-      for item in list:
-        serverItem = {
-          'title': 'Server: ' + item['note'],
-          'arg': 'server:' +item['id']+':'+item['note'],
-        }
-        items.append(serverItem)
+      def setModes():
+        for m in self.MODES:
+          modeItem = {
+            'title': 'Mode: '+m.title(),
+            'arg': 'mode:'+m,
+            'icon': {'path': 'iconb.png'}
+          }
+          if m == mode:
+            modeItem['icon']['path'] = 'icon.png'
+            modeItem['subtitle'] = 'Current Mode'
+          else:
+            modeItem['subtitle'] = 'Switch to ' + m
+          items.append(modeItem)
+
+      def setServers():
+        for item in list:
+          serverItem = {
+            'title': 'Server: ' + item['note'],
+            'arg': 'server:' +item['id']+':'+item['note'],
+          }
+          if item['active'] != '1':
+            serverItem['icon'] = {'path': 'iconb.png'}
+          items.append(serverItem)
+      setToggler()
+      setModes()
+      setServers()
+
     else:
       notRuning = {
         'title':'ShadowSocks is not runing',
@@ -144,4 +153,4 @@ class Client:
       items.append(notRuning)
     result = {'items': items}
     print(json.dumps(result))
-    
+
