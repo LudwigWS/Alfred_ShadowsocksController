@@ -1,8 +1,6 @@
 # Alfred_ShadowsocksController
 
-This workflow is forked from [yourtion/Alfred_ShadowsocksController](https://github.com/yourtion) with a few modification to adapt to [shadowsocks/ShadowsocksX-NG](https://github.com/shadowsocks/ShadowsocksX-NG).
-
-
+**Note:** This workflow **must be used with** [my fork of ShadowscoksX-NG](https://github.com/yangziy/ShadowsocksX-NG) in which the HTTP API is supported until the fork is merged to original repository. 
 
 ## Screenshot
 

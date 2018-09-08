@@ -8,9 +8,9 @@ import urllib
 class Client:
 
   httpClient = None
-  SERVER='/servers'
+  LIST_SERVER='/server/list'
+  CUR_SERVER='/server/current'
   STATUS='/status'
-  TOGGLE='/toggle'
   MODE='/mode'
   MODES=['auto','global','manual']
 
@@ -40,10 +40,17 @@ class Client:
     return str.split(':', 2);
 
   def _getServers(self):
-    res = self._get(self.SERVER)
+    res = self._get(self.LIST_SERVER)
     if res:
       return json.loads(res.read())
     return []
+
+  def _getCurrentServer(self):
+    res = self._get(self.CUR_SERVER)
+    if res:
+      return json.loads(res.read())
+    return []
+
 
   def _getStatus(self):
     res = self._get(self.STATUS)
@@ -60,26 +67,26 @@ class Client:
     return 'unknow'
 
   def _setStatus(self):
-    res = self._post(self.TOGGLE, {})
+    res = self._post(self.STATUS, {})
     if res:
       data = json.loads(res.read())
-      return data['Status'] == 1
+      return data['status'] == 1
     return False
 
   def _setServer(self, id):
-    parma = {'uuid': id}
-    res = self._post(self.SERVER, parma)
+    parma = {'Id': id}
+    res = self._post(self.CUR_SERVER, parma)
     if res:
       data = json.loads(res.read())
       return data['status'] == 1
     return False
 
   def _setMode(self, mode):
-    parma = {'value': mode}
+    parma = {'mode': mode}
     res = self._post(self.MODE, parma)
     if res:
       data = json.loads(res.read())
-      return data['Status'] == 1
+      return data['status'] == 1
     return False
 
   def action(self, query):
@@ -100,6 +107,8 @@ class Client:
 
   def getList(self):
     list = self._getServers()
+    current = self._getCurrentServer()
+    active = self._getCurrentServer()
     enable = self._getStatus()
     enableStr = 'Enable' if enable else 'Disable'
     enableOptStr = 'Disable' if enable else 'Enable'
@@ -134,10 +143,10 @@ class Client:
       def setServers():
         for item in list:
           serverItem = {
-            'title': 'Server: ' + item['note'],
-            'arg': 'server:' +item['id']+':'+item['note'],
+            'title': 'Server: ' + item['Remark'],
+            'arg': 'server:' +item['Id']+':'+item['Remark'],
           }
-          if item['active'] != '1':
+          if item['Id'] != current['Id']:
             serverItem['icon'] = {'path': 'iconb.png'}
           items.append(serverItem)
       setToggler()
