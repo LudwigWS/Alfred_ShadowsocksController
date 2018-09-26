@@ -8,8 +8,8 @@ import urllib
 class Client:
 
   httpClient = None
-  LIST_SERVER='/server/list'
-  CUR_SERVER='/server/current'
+  LIST_SERVER='/servers'
+  CUR_SERVER='/current'
   STATUS='/status'
   MODE='/mode'
   MODES=['auto','global','manual']
@@ -30,7 +30,7 @@ class Client:
       params = urllib.urlencode(parma)
       headers = {'Content-type': 'application/x-www-form-urlencoded'
                      , 'Accept': 'text/plain'}
-      self.httpClient.request('POST', url, params, headers)
+      self.httpClient.request('PUT', url, params, headers)
       res = self.httpClient.getresponse()
       return res if res.status == 200 and res.reason == 'OK' else False
     except Exception, e:
@@ -56,21 +56,21 @@ class Client:
     res = self._get(self.STATUS)
     if res:
       data = json.loads(res.read())
-      return data['enable']
+      return data['Enable']
     return False
 
   def _getMode(self):
     res = self._get(self.MODE)
     if res:
       data = json.loads(res.read())
-      return data['mode']
+      return data['Mode']
     return 'unknow'
 
   def _setStatus(self):
     res = self._post(self.STATUS, {})
     if res:
       data = json.loads(res.read())
-      return data['status'] == 1
+      return res.status == 200;
     return False
 
   def _setServer(self, id):
@@ -78,15 +78,15 @@ class Client:
     res = self._post(self.CUR_SERVER, parma)
     if res:
       data = json.loads(res.read())
-      return data['status'] == 1
+      return res.status == 200;
     return False
 
   def _setMode(self, mode):
-    parma = {'mode': mode}
+    parma = {'Mode': mode}
     res = self._post(self.MODE, parma)
     if res:
       data = json.loads(res.read())
-      return data['status'] == 1
+      return res.status == 200;
     return False
 
   def action(self, query):
